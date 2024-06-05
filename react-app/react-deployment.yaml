@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-app-deployment
+  namespace: frontend
+  labels:
+    app: react-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-app
+  template:
+    metadata:
+      labels:
+        app: react-app
+    spec:
+      containers:
+      - name: react-app
+        image: gcr.io/ica2-425321/frontend:v2
+        ports:
+        - containerPort: 80
+        env:
+        - name: REACT_APP_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: REACT_APP_API_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-app
+  namespace: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: react-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
